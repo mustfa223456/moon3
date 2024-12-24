@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>موقع المستفيد - متجر الصور والفيديوهات</title>
+  <style>
+    /* إعدادات أساسية */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+      transition: background-color 0.3s ease;
+    }
+
+    header {
+      background-color: #2c3e50;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    nav ul li {
+      display: inline-block;
+      margin: 0 15px;
+    }
+
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+      color: #2c3e50;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    input[type="file"] {
+      display: block;
+      margin: 10px auto;
+    }
+
+    /* تنسيق المعرض */
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .gallery img, .gallery video {
+      max-width: 150px;
+      height: auto;
+      margin: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease-in-out;
+      position: relative;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery img:hover, .gallery video:hover {
+      transform: scale(1.05);
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+
+    /* البحث */
+    #search-section {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    #searchButton {
+      margin-top: 10px;
+    }
+
+    #resetButton {
+      margin-top: 10px;
+      background-color: #e74c3c;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* الوضع المظلم */
+    body.dark-mode {
+      background-color: #2c3e50;
+      color: #f5f5f5;
+    }
+
+    /* تخصيص الصور 360 درجة */
+    .image360 {
+      width: 100%;
+      height: 300px;
+      background-color: #000;
+    }
+
+    /* خيارات التفاعل مع المستخدم */
+    .like-btn {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background-color: #e74c3c;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      border-radius: 5px;
+    }
+
+    .like-btn:hover {
+      background-color: #c0392b;
+    }
+
+    /* ملصقات تفاعلية */
+    .sticker {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    /* تملك الموقع */
+    footer {
+      background-color: #2c3e50;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* التكبير عند النقر */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .lightbox img {
+      width: auto;
+      height: auto;
+      max-width: none;
+      max-height: none;
+      display: block;
+    }
+
+    .lightbox.show {
+      display: flex;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 18px;
+      border-radius: 5px;
+    }
+
+    /* زر إلغاء التثبيت */
+    .unpin-btn {
+      position: absolute;
+      top: 40px;
+      right: 10px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#">الرئيسية</a></li>
+        <li><a href="#">الصور</a></li>
+        <li><a href="#">الفيديوهات</a></li>
+        <li><a href="#">البحث</a></li>
+        <li><a href="#" id="themeToggle">الوضع المظلم</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="upload-section">
+      <h2>رفع الصور والفيديوهات</h2>
+      <form id="uploadForm" class="hidden">
+        <input type="file" id="fileInput" multiple accept="image/*, video/*">
+        <button type="submit">رفع الملفات</button>
+      </form>
+      <p id="errorMessage" style="color: red; display: none;">الرمز غير صحيح. يرجى المحاولة مرة أخرى.</p>
+      <button id="verifyButton">التحقق من الرمز للوصول إلى الرفع</button>
+    </section>
+
+    <section id="gallery">
+      <h2>معرض الصور</h2>
+      <div id="imageGallery" class="gallery"></div>
+      <h2>معرض الفيديوهات</h2>
+      <div id="videoGallery" class="gallery"></div>
+    </section>
+
+    <section id="search-section">
+      <h2>البحث</h2>
+      <input type="text" id="searchInput" placeholder="ابحث عن صورة أو فيديو...">
+      <button id="searchButton">بحث</button>
+      <button id="resetButton">إرجاع إلى كل العناصر</button>
+    </section>
+
+    <section id="like-section">
+      <h2>الإعجابات</h2>
+      <button class="like-btn">إعجاب</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 موقع المستفيد - جميع الحقوق محفوظة</p>
+  </footer>
+
+  <!-- نافذة التكبير (Lightbox) -->
+  <div id="lightbox" class="lightbox">
+    <button class="lightbox-close" id="lightboxClose">×</button>
+    <img id="lightboxImage" src="" alt="صورة مكبرة">
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const imageGallery = document.getElementById('imageGallery');
+    const videoGallery = document.getElementById('videoGallery');
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const resetButton = document.getElementById('resetButton');
+    const verifyButton = document.getElementById('verifyButton');
+    const errorMessage = document.getElementById('errorMessage');
+    const themeToggle = document.getElementById('themeToggle');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    const correctCode = 'tofe1998';
+
+    // التبديل بين الوضع المظلم والعادي
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+    });
+
+    // التحقق من الرمز
+    verifyButton.addEventListener('click', () => {
+      const code = prompt("أدخل الرمز للوصول إلى الرفع:");
+      if (code === correctCode) {
+        uploadForm.classList.remove('hidden');
+        errorMessage.style.display = 'none';
+      } else {
+        errorMessage.style.display = 'block';
+      }
+    });
+
+    // رفع الملفات
+    uploadForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const files = fileInput.files;
+
+      for (let file of files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const fileURL = e.target.result;
+          const fileElement = file.type.startsWith('image') ?
+            `<img src="${fileURL}" alt="${file.name}" class="file-item">` :
+            `<video src="${fileURL}" controls class="file-item"></video>`;
+
+          const galleryElement = document.createElement('div');
+          galleryElement.innerHTML = `
+            <div class="file-container">
+              ${fileElement}
+              <button class="delete-btn">حذف</button>
+              <button class="pin-btn">تثبيت</button>
+              <button class="unpin-btn hidden">إلغاء التثبيت</button>
+            </div>
+          `;
+
+          const pinBtn = galleryElement.querySelector('.pin-btn');
+          const unpinBtn = galleryElement.querySelector('.unpin-btn');
+          const deleteBtn = galleryElement.querySelector('.delete-btn');
+
+          // زر التثبيت
+          pinBtn.addEventListener('click', () => {
+            localStorage.setItem(file.name, fileURL);
+            pinBtn.style.display = 'none';
+            unpinBtn.style.display = 'inline-block';
+          });
+
+          // زر إلغاء التثبيت
+          unpinBtn.addEventListener('click', () => {
+            localStorage.removeItem(file.name);
+            unpinBtn.style.display = 'none';
+            pinBtn.style.display = 'inline-block';
+          });
+
+          // زر الحذف
+          deleteBtn.addEventListener('click', () => {
+            galleryElement.remove();
+            localStorage.removeItem(file.name); // حذف من localStorage عند الحذف
+          });
+
+          // إضافة العنصر إلى المعرض المناسب
+          if (file.type.startsWith('image')) {
+            imageGallery.appendChild(galleryElement);
+          } else {
+            videoGallery.appendChild(galleryElement);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // البحث
+    searchButton.addEventListener('click', () => {
+      const searchText = searchInput.value.toLowerCase();
+      const items = document.querySelectorAll('.file-item');
+
+      items.forEach(item => {
+        const itemName = item.alt ? item.alt.toLowerCase() : item.src.toLowerCase();
+        item.closest('.file-container').style.display = itemName.includes(searchText) ? '' : 'none';
+      });
+    });
+
+    // إعادة تعيين البحث
+    resetButton.addEventListener('click', () => {
+      searchInput.value = '';
+      const items = document.querySelectorAll('.file-container');
+      items.forEach(item => {
+        item.style.display = '';
+      });
+    });
+
+    // إضافة العناصر المثبتة عند تحميل الصفحة
+    window.addEventListener('load', () => {
+      Object.keys(localStorage).forEach(key => {
+        const fileURL = localStorage.getItem(key);
+        const fileElement = key.endsWith('.jpg') || key.endsWith('.jpeg') || key.endsWith('.png') ?
+          `<img src="${fileURL}" alt="${key}" class="file-item">` :
+          `<video src="${fileURL}" controls class="file-item"></video>`;
+
+        const galleryElement = document.createElement('div');
+        galleryElement.innerHTML = `
+          <div class="file-container">
+            ${fileElement}
+            <button class="delete-btn">حذف</button>
+            <button class="pin-btn hidden">تثبيت</button>
+            <button class="unpin-btn">إلغاء التثبيت</button>
+          </div>
+        `;
+
+        const unpinBtn = galleryElement.querySelector('.unpin-btn');
+        const deleteBtn = galleryElement.querySelector('.delete-btn');
+
+        // زر إلغاء التثبيت
+        unpinBtn.addEventListener('click', () => {
+          localStorage.removeItem(key);
+          unpinBtn.style.display = 'none';
+        });
+
+        // زر الحذف
+        deleteBtn.addEventListener('click', () => {
+          galleryElement.remove();
+          localStorage.removeItem(key);
+        });
+
+        // إضافة العنصر إلى المعرض المناسب
+        if (key.endsWith('.jpg') || key.endsWith('.jpeg') || key.endsWith('.png')) {
+          imageGallery.appendChild(galleryElement);
+        } else {
+          videoGallery.appendChild(galleryElement);
+        }
+      });
+    });
+
+    // عرض الصورة أو الفيديو عند النقر عليه
+    document.querySelectorAll('.file-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const source = e.target.src;
+        lightboxImage.src = source;
+        lightbox.classList.add('show');
+      });
+    });
+
+    // إغلاق نافذة التكبير
+    lightboxClose.addEventListener('click', () => {
+      lightbox.classList.remove('show');
+    });
+  </script>
+</body>
+</html>
